@@ -1,0 +1,30 @@
+# Local credentials (keep the safe example in version control)
+token.txt
+token.txt.*
+!token.txt.example
+
+# Private archive output, logs, and local ZIP bundles
+archive/
+export.log
+*.zip
+
+# Generated Python bytecode and local environments
+__pycache__/
+*.py[co]
+.venv/
+venv/
+
+# Local session metadata
+.cortexkit/
+
+# Local release staging and build output
+.release/
+.release-venv/
+build/
+dist/
+*.spec
+
+# Signing material must stay local
+Github_signing_key*
+*.pem
+*.key

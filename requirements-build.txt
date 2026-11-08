@@ -1,0 +1,2 @@
+# Build tool only; the source application has no third-party runtime packages.
+pyinstaller==6.22.3

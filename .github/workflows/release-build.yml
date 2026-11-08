@@ -1,0 +1,76 @@
+name: Build release downloads
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source:
+    name: Source archive and checks
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: '3.13'
+      - run: python scripts/check_public_files.py --staged
+      - run: python -m discord_archiver selftest
+      - run: python -W error::ResourceWarning audit/reproduce_findings.py
+      - run: python scripts/build_release.py --source-only
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: release-source
+          path: |
+            dist/*-source.zip
+            dist/*-source.zip.sha256
+          if-no-files-found: error
+
+  native:
+    name: Native ${{ matrix.label }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - label: Windows-x64
+            runner: windows-2022
+          - label: macOS-x64
+            runner: macos-15-intel
+          - label: macOS-arm64
+            runner: macos-15
+          - label: Linux-x64
+            runner: ubuntu-22.04
+          - label: Linux-arm64
+            runner: ubuntu-22.04-arm
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: '3.13'
+      - name: Install Linux desktop libraries
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y tk xvfb
+      - run: python -m pip install -r requirements-build.txt
+      - run: python -m discord_archiver selftest
+      - run: python -W error::ResourceWarning audit/reproduce_findings.py
+      - run: python scripts/build_release.py --label ${{ matrix.label }}
+      - name: Check Linux window
+        if: runner.os == 'Linux'
+        run: xvfb-run -a python scripts/smoke_native.py dist/native/Discord-Archiver
+      - name: Check macOS window
+        if: runner.os == 'macOS'
+        run: python scripts/smoke_native.py dist/native/Discord-Archiver
+      - name: Check Windows window
+        if: runner.os == 'Windows'
+        run: python scripts/smoke_native.py dist/native/Discord-Archiver.exe
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: release-${{ matrix.label }}
+          path: |
+            dist/*-${{ matrix.label }}.zip
+            dist/*-${{ matrix.label }}.zip.sha256
+            dist/*-${{ matrix.label }}.tar.gz
+            dist/*-${{ matrix.label }}.tar.gz.sha256
+          if-no-files-found: error
