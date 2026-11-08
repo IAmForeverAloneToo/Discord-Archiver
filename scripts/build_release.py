@@ -74,7 +74,7 @@ def native_archive(label: str) -> Path:
         package = Path(temporary) / prefix
         package.mkdir()
         shutil.copy2(executable, package / executable.name)
-        for name in ("README.md", "LICENSE", "DISCLAIMER.md", "SECURITY.md", "token.txt.example"):
+        for name in ("README.md", "LICENSE", "DISCLAIMER.md", "SECURITY.md", "CONTRIBUTING.md", "token.txt.example"):
             shutil.copy2(ROOT / name, package / name)
         shutil.copytree(ROOT / "docs", package / "docs")
         licenses = package / "licenses"

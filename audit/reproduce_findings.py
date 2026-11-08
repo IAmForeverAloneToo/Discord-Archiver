@@ -373,7 +373,7 @@ class ReviewRegressions(unittest.TestCase):
             saved = folder / "media" / name
             saved.write_bytes(b"audit")
             encoded = urllib.parse.quote(name)
-            self.assertEqual(_safe_file(root, f"/channels/{CID}/media/{encoded}"), saved)
+            self.assertEqual(_safe_file(root, f"/channels/{CID}/media/{encoded}"), saved.resolve())
             for path in (f"/channels/{CID}/../channel.json", "/channels/%2e%2e/account.json", f"/channels/{CID}/media/%2e%2e%5c%2e%2e%5caccount.json", "/token.txt"):
                 self.assertIsNone(_safe_file(root, path))
             with local_server(root) as port:

@@ -198,7 +198,7 @@ def _file_version(path: Path) -> tuple[str, int, int]:
 
 class ArchiveIndex:
     def __init__(self, archive: Path):
-        self.archive = archive
+        self.archive = archive.resolve()
         self._lock = threading.Lock()
         self._messages: dict[str, tuple[tuple[str, int, int], list[tuple[int, int]]]] = {}
         self._media: dict[str, tuple[tuple[str, int, int], dict[str, list[dict]]]] = {}
@@ -336,6 +336,8 @@ def list_channels(archive: Path) -> list[dict]:
 
 
 def make_handler(archive: Path, index: ArchiveIndex):
+    archive = archive.resolve()
+
     class Handler(BaseHTTPRequestHandler):
         def log_message(self, fmt: str, *args) -> None:
             return
