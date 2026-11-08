@@ -31,6 +31,7 @@ PUBLIC_FILES = (
     "discord_archiver/selftest.py", "discord_archiver/util.py", "discord_archiver/viewer.py",
     "audit/BUG_SECURITY_REVIEW.md", "audit/reproduce_findings.py",
     "docs/USER_GUIDE.md", "docs/COMMANDS.md", "docs/RELEASE_NOTES.md",
+    "licenses/TCL-LICENSE.txt", "licenses/TK-LICENSE.txt",
     "scripts/build_release.py", "scripts/check_public_files.py", "scripts/smoke_native.py",
 )
 
@@ -79,6 +80,8 @@ def native_archive(label: str) -> Path:
         shutil.copytree(ROOT / "docs", package / "docs")
         licenses = package / "licenses"
         licenses.mkdir()
+        for name in ("TCL-LICENSE.txt", "TK-LICENSE.txt"):
+            shutil.copy2(ROOT / "licenses" / name, licenses / name)
         python_license = next((path for path in (
             Path(sys.base_prefix) / "LICENSE.txt", Path(sys.base_prefix) / "LICENSE",
             Path(sys.base_prefix) / "lib" / f"python{sys.version_info.major}.{sys.version_info.minor}" / "LICENSE.txt",
@@ -93,7 +96,8 @@ def native_archive(label: str) -> Path:
         (licenses / "README.txt").write_text(
             "This download bundles Python and Tcl/Tk using PyInstaller.\n"
             "Python license: PYTHON-LICENSE.txt\n"
-            "Tcl/Tk licenses are also included with the bundled runtime data.\n"
+            "Tcl license: TCL-LICENSE.txt\n"
+            "Tk license: TK-LICENSE.txt\n"
             "PyInstaller's distribution exception permits distributing bundled applications.\n"
             "https://pyinstaller.org/en/stable/license.html\n", encoding="utf-8"
         )
